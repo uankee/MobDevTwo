@@ -8,7 +8,6 @@ export default function DamageScreen() {
   const router = useRouter();
   const ref = useRef(null);
   
-  // Стан для блокування прокрутки екрана під час малювання
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const handleFinish = () => {
@@ -41,16 +40,13 @@ export default function DamageScreen() {
           <SignatureScreen
             ref={ref}
             onOK={handleFinish}
-            // Блокуємо скрол, коли користувач починає малювати
             onBegin={() => setScrollEnabled(false)}
-            // Повертаємо скрол, коли малювання завершено
             onEnd={() => setScrollEnabled(true)}
             webStyle={`.m-signature-pad--footer { display: none; margin: 0; }`}
             descriptionText="Намалюйте ескіз ДТП тут"
           />
         </View>
 
-        {/* Окрема велика кнопка для завершення */}
         <TouchableOpacity 
           style={styles.mainFinishButton} 
           onPress={handleFinish}
@@ -58,7 +54,6 @@ export default function DamageScreen() {
           <ThemedText style={styles.buttonText}>ЗАВЕРШИТИ ОФОРМЛЕННЯ</ThemedText>
         </TouchableOpacity>
         
-        {/* Відступ знизу для зручності */}
         <View style={{ height: 60 }} />
       </ScrollView>
     </View>

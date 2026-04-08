@@ -34,7 +34,7 @@ export async function setupNotifications() {
     await Notifications.setNotificationChannelAsync('todo-channel', {
       name: 'Дедлайни ToDo',
       importance: Notifications.AndroidImportance.HIGH,
-      sound: 'custom_sound.wav', // Прив'язка власного звуку
+      sound: 'custom_sound.wav',
     });
   }
 }
@@ -48,12 +48,12 @@ export async function scheduleTodoNotification(id: string, title: string, deadli
       title: '⏳ Дедлайн завдання!',
       body: `Час виконати: ${title}`,
       data: { todoId: id },
-      categoryIdentifier: 'todo-deadline', // Категорія з кнопками
-      sound: 'custom_sound.wav', // Кастомний звук для iOS
+      categoryIdentifier: 'todo-deadline', 
+      sound: 'custom_sound.wav', 
     },
     trigger: {
       date: deadline,
-      channelId: 'todo-channel', // Обов'язково для Android
+      channelId: 'todo-channel', 
     },
   });
 

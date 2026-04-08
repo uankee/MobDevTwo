@@ -8,7 +8,6 @@ import * as dbOrm from '../../../../services/db_orm';
 import migrations from '../../../../drizzle/migrations';
 import * as schema from '../../../../services/db_schema';
 
-// Ініціалізація бази даних
 const expoDb = openDatabaseSync('todos_v2.db');
 const db = drizzle(expoDb, { schema });
 
@@ -100,7 +99,6 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
     console.error("Migration error:", error);
   }
 
-  // САМЕ ТУТ БУЛА ПРОБЛЕМА: ми передали всі функції у value
   return (
     <TodoContext.Provider value={{ 
       todos, 
@@ -115,7 +113,6 @@ export const TodoProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Хук для зручного використання контексту
 export const useTodos = () => {
   const context = useContext(TodoContext);
   if (!context) {
@@ -124,5 +121,4 @@ export const useTodos = () => {
   return context;
 };
 
-// Заглушка, щоб Expo Router не вважав цей файл окремим екраном
 export default function DummyScreen() { return null; }

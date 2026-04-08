@@ -25,11 +25,8 @@ export default function CreateTodoScreen() {
       return;
     }
     
-    // ОСЬ ТУТ ГОЛОВНЕ ВИПРАВЛЕННЯ:
-    // Тепер ми передаємо просто текст і дату, як того вимагає SQLite!
     await addTodo(title, deadline);
     
-    // Успішно повертаємось назад
     router.push('/homework/todotabs');
   };
 

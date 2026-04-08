@@ -8,25 +8,19 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function AnimationsScreen() {
-  // Стан для відстеження поточного відсотка (0, 25, 50, 75, 100)
   const [progress, setProgress] = useState(0);
   
-  // Shared value для Reanimated (зберігає значення для анімації)
   const animatedProgress = useSharedValue(0);
 
-  // Завдання 1: Плавна зміна ширини при оновленні state
   useEffect(() => {
     animatedProgress.value = withTiming(progress, { duration: 600 });
   }, [progress]);
 
-  // Обробник натискання кнопки "next"
   const handleNext = () => {
     setProgress((prev) => (prev >= 100 ? 0 : prev + 25));
   };
 
-  // Завдання 2: Анімовані стилі (ширина + залежність кольору від відсотка)
   const animatedStyle = useAnimatedStyle(() => {
-    // Плавна зміна кольору відповідно до макета
     const backgroundColor = interpolateColor(
       animatedProgress.value,
       [0, 25, 50, 75, 100],
@@ -49,7 +43,6 @@ export default function AnimationsScreen() {
     <View style={styles.container}>
       <Text style={styles.header}>TEMA: Animations. Reanimated</Text>
       
-      {/* Контейнер прогрес-бару (сірий фон) */}
       <View style={styles.track}>
         <Animated.View style={[styles.progressBar, animatedStyle]}>
           <Text style={styles.progressText}>
@@ -58,7 +51,6 @@ export default function AnimationsScreen() {
         </Animated.View>
       </View>
 
-      {/* Кнопка "next" */}
       <TouchableOpacity style={styles.button} onPress={handleNext}>
         <Text style={styles.buttonText}>NEXT</Text>
       </TouchableOpacity>
@@ -81,8 +73,7 @@ const styles = StyleSheet.create({
   },
   track: {
     height: 24,
-    backgroundColor: '#e0e0e0', // Сірий фон незаповненої частини
-    borderRadius: 12,
+    backgroundColor: '#e0e0e0',
     overflow: 'hidden',
     marginBottom: 40,
   },
