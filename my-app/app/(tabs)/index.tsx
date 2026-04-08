@@ -10,6 +10,7 @@ const homeworks = [
   { id: '2', title: 'Завдання 2: Todo List (API)', route: '/homework/todos' },
   { id: '3', title: 'Завдання 3: Європротокол (Stack)', route: '/homework/europrotocol' },
   { id: '4', title: 'Завдання 4: ToDo List (Tabs)', route: '/homework/todotabs' },
+  { id: '5', title: 'Завдання 5: Анімації', route: '/homework/animations' },
 ];
 
 export default function HomeScreen() {
