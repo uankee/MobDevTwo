@@ -1,61 +1,61 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true, 
-    shouldShowList: true,   
-  }),
-});
-
 export const TODO_ACTIONS = {
-  COMPLETE: 'complete-todo',
-  DELETE: 'delete-todo',
+  COMPLETE: 'COMPLETE_TODO',
+  DELETE: 'DELETE_TODO',
 };
 
 export async function setupNotifications() {
+  await Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true, 
+      shouldShowList: true,  
+    }),
+  });
+
   await Notifications.setNotificationCategoryAsync('todo-deadline', [
     {
       identifier: TODO_ACTIONS.COMPLETE,
-      buttonTitle: '✅ Виконано',
-      options: { isDestructive: false },
+      buttonTitle: 'Виконати (Complete)',
+      options: { opensAppToForeground: false },
     },
     {
       identifier: TODO_ACTIONS.DELETE,
-      buttonTitle: '🗑️ Видалити',
-      options: { isDestructive: true },
+      buttonTitle: 'Видалити (Delete)',
+      options: { isDestructive: true, opensAppToForeground: false },
     },
   ]);
 
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-      sound: 'custom_sound.wav', // Підключення кастомного звуку для Android
+    await Notifications.setNotificationChannelAsync('todo-channel', {
+      name: 'Дедлайни ToDo',
+      importance: Notifications.AndroidImportance.HIGH,
+      sound: 'custom_sound.wav', // Прив'язка власного звуку
     });
   }
 }
 
-export async function scheduleTodoNotification(id: string, title: string, date: Date) {
-  const triggerSeconds = Math.floor((date.getTime() - Date.now()) / 1000);
-  if (triggerSeconds <= 0) return null;
+export async function scheduleTodoNotification(id: string, title: string, deadline: Date) {
+  const hasPermission = await Notifications.requestPermissionsAsync();
+  if (!hasPermission.granted) return null;
 
-  return await Notifications.scheduleNotificationAsync({
+  const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
-      title: "⏰ Дедлайн по завданню!",
-      body: title,
-      categoryIdentifier: 'todo-deadline',
-      sound: 'custom_sound.wav', // Вказуємо кастомний звук для iOS
+      title: '⏳ Дедлайн завдання!',
+      body: `Час виконати: ${title}`,
       data: { todoId: id },
+      categoryIdentifier: 'todo-deadline', // Категорія з кнопками
+      sound: 'custom_sound.wav', // Кастомний звук для iOS
     },
-    trigger: { 
-      seconds: triggerSeconds,
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL 
+    trigger: {
+      date: deadline,
+      channelId: 'todo-channel', // Обов'язково для Android
     },
   });
+
+  return notificationId;
 }

@@ -1,7 +1,8 @@
+import React from 'react';
 import { Tabs } from 'expo-router';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store'; 
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import { TodoProvider } from './TodoContext';
 
 export default function TodoTabsLayout() {
@@ -9,17 +10,29 @@ export default function TodoTabsLayout() {
 
   return (
     <TodoProvider>
-      <Tabs screenOptions={{ tabBarActiveTintColor: '#0a7ea4' }}>
+      <Tabs screenOptions={{ tabBarActiveTintColor: '#0a7ea4', headerShown: true }}>
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Список',
-            tabBarBadge: incompleteCount > 0 ? incompleteCount : undefined,
+            title: 'Мої Завдання',
             tabBarIcon: ({ color }) => <Ionicons name="list" size={24} color={color} />,
+            tabBarBadge: incompleteCount > 0 ? incompleteCount : undefined,
           }}
         />
-        <Tabs.Screen name="details" options={{ title: 'Деталі' }} />
-        <Tabs.Screen name="create" options={{ title: 'Створити' }} />
+        <Tabs.Screen
+          name="details"
+          options={{
+            title: 'Деталі',
+            tabBarIcon: ({ color }) => <Ionicons name="information-circle" size={24} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="create"
+          options={{
+            title: 'Створити',
+            tabBarIcon: ({ color }) => <Ionicons name="add-circle" size={24} color={color} />,
+          }}
+        />
       </Tabs>
     </TodoProvider>
   );
