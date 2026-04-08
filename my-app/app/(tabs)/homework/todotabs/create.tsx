@@ -8,15 +8,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 export default function CreateTodoScreen() {
   const { addTodo } = useTodos();
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   
-  // Нові стани для дедлайну
-  const [deadline, setDeadline] = useState(new Date(Date.now() + 60000)); // За замовчуванням +1 хвилина
+  const [title, setTitle] = useState('');
+  const [deadline, setDeadline] = useState(new Date(Date.now() + 60000));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('Помилка', 'Будь ласка, введіть назву завдання');
       return;
@@ -27,96 +25,64 @@ export default function CreateTodoScreen() {
       return;
     }
     
-    addTodo({
-      id: Date.now().toString(),
-      title,
-      description,
-      completed: false,
-      deadline: deadline.toISOString() // Зберігаємо дедлайн
-    });
-
-    Alert.alert('Успіх', 'Завдання успішно додано!');
-    setTitle('');
-    setDescription('');
-    setDeadline(new Date(Date.now() + 60000));
+    // ОСЬ ТУТ ГОЛОВНЕ ВИПРАВЛЕННЯ:
+    // Тепер ми передаємо просто текст і дату, як того вимагає SQLite!
+    await addTodo(title, deadline);
     
+    // Успішно повертаємось назад
     router.push('/homework/todotabs');
   };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
+    setShowDatePicker(Platform.OS === 'ios');
     if (selectedDate) {
-      const currentDate = selectedDate;
-      setDeadline(currentDate);
-      if (Platform.OS === 'android') {
-        // На Android після дати показуємо вибір часу
-        setShowTimePicker(true);
-      }
+      const newDate = new Date(deadline);
+      newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+      setDeadline(newDate);
     }
   };
 
   const onTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
+    setShowTimePicker(Platform.OS === 'ios');
     if (selectedTime) {
-      const newDeadline = new Date(deadline);
-      newDeadline.setHours(selectedTime.getHours());
-      newDeadline.setMinutes(selectedTime.getMinutes());
-      setDeadline(newDeadline);
+      const newDate = new Date(deadline);
+      newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+      setDeadline(newDate);
     }
   };
 
   return (
     <View style={styles.container}>
-      <ThemedText type="subtitle" style={styles.label}>Коротка назва</ThemedText>
-      <TextInput 
-        style={styles.input} 
-        placeholder="Що потрібно зробити?" 
+      <ThemedText style={styles.label}>Назва завдання:</ThemedText>
+      <TextInput
+        style={styles.input}
         value={title}
         onChangeText={setTitle}
+        placeholder="Що потрібно зробити?"
       />
 
-      <ThemedText type="subtitle" style={styles.label}>Детальний опис</ThemedText>
-      <TextInput 
-        style={[styles.input, styles.textArea]} 
-        placeholder="Додайте більше деталей..." 
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-
-      <ThemedText type="subtitle" style={styles.label}>Дедлайн</ThemedText>
+      <ThemedText style={styles.label}>Дедлайн:</ThemedText>
+      
       <View style={styles.dateContainer}>
-        <ThemedText style={styles.dateText}>
-          {deadline.toLocaleDateString('uk-UA')} {deadline.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
-        </ThemedText>
         <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-          <ThemedText style={styles.dateButtonText}>Змінити</ThemedText>
+          <ThemedText style={styles.dateText}>{deadline.toLocaleDateString()}</ThemedText>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.dateButton} onPress={() => setShowTimePicker(true)}>
+          <ThemedText style={styles.dateText}>{deadline.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</ThemedText>
         </TouchableOpacity>
       </View>
 
-      {/* Пікер для Android (окремо дата, окремо час) */}
-      {Platform.OS === 'android' && showDatePicker && (
+      {showDatePicker && (
         <DateTimePicker value={deadline} mode="date" display="default" onChange={onDateChange} />
       )}
-      {Platform.OS === 'android' && showTimePicker && (
+      
+      {showTimePicker && (
         <DateTimePicker value={deadline} mode="time" display="default" onChange={onTimeChange} />
       )}
 
-      {/* Пікер для iOS (все разом) */}
-      {Platform.OS === 'ios' && showDatePicker && (
-        <DateTimePicker 
-          value={deadline} 
-          mode="datetime" 
-          display="default" 
-          onChange={(event, date) => {
-            setShowDatePicker(false);
-            if (date) setDeadline(date);
-          }} 
-        />
-      )}
-
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <ThemedText style={styles.buttonText}>ЗБЕРЕГТИ ЗАВДАННЯ</ThemedText>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <ThemedText style={styles.saveButtonText}>ЗБЕРЕГТИ</ThemedText>
       </TouchableOpacity>
     </View>
   );
@@ -124,13 +90,11 @@ export default function CreateTodoScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  label: { marginBottom: 5, marginTop: 15, color: '#000' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 15, borderRadius: 8, fontSize: 16, backgroundColor: '#fafafa' },
-  textArea: { height: 120, textAlignVertical: 'top' },
-  button: { backgroundColor: '#0a7ea4', padding: 18, borderRadius: 12, alignItems: 'center', marginTop: 30 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  dateContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 15, backgroundColor: '#fafafa' },
-  dateText: { fontSize: 16 },
-  dateButton: { backgroundColor: '#e0e0e0', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8 },
-  dateButtonText: { color: '#333', fontWeight: '500' }
+  label: { fontSize: 16, marginBottom: 8, fontWeight: 'bold' },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 20, fontSize: 16 },
+  dateContainer: { flexDirection: 'row', gap: 10, marginBottom: 30 },
+  dateButton: { flex: 1, padding: 15, backgroundColor: '#f0f0f0', borderRadius: 8, alignItems: 'center' },
+  dateText: { fontSize: 16, color: '#333' },
+  saveButton: { backgroundColor: '#0a7ea4', padding: 15, borderRadius: 8, alignItems: 'center' },
+  saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });
