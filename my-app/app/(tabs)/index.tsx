@@ -11,6 +11,7 @@ const homeworks = [
   { id: '3', title: 'Завдання 3: Європротокол (Stack)', route: '/homework/europrotocol' },
   { id: '4', title: 'Завдання 4: ToDo List (Tabs)', route: '/homework/todotabs' },
   { id: '5', title: 'Завдання 5: Анімації', route: '/homework/animations' },
+  { id: '6', title: 'Завдання 6: Gestures (Tinder Swipe)', route: '/homework/gestures' },
 ];
 
 export default function HomeScreen() {
